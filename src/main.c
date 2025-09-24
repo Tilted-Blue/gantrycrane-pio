@@ -137,29 +137,29 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (((PINF & (1 << pinStartKnop)) == 0) || (startKnop == 1)) {
-    printf("Startknop\n");
-    startKnop = 1;
+    if (((PINF & (1 << pinStartKnop)) == 0) || (startKnop == 1)) {
+        printf("Startknop\n");
+        startKnop = 1;
 
-    if (homeSenderDone == 0) homeSender();
+        if (homeSenderDone == 0) homeSender();
 
-    if((infoEindPosOpgehaald == 0) || (infoEindPosOpgehaald2 == 0)) pickUp_and_DropOff_pos();
+        if((infoEindPosOpgehaald == 0) || (infoEindPosOpgehaald2 == 0)) pickUp_and_DropOff_pos();
 
-    if(PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord)){
-        if ((infoEindPosOpgehaald == 1) && (startSlot == 1) && (infoEindPosOpgehaald2 == 1)) {
-            motorX(xNu_TOV_xEind(xNu, xEind));
-            motorY(yNu_TOV_yEind(yNu, yEind));
+        if(!(PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord))){
+            if ((infoEindPosOpgehaald == 1) && (startSlot == 1) && (infoEindPosOpgehaald2 == 1)) {
+                motorX(xNu_TOV_xEind(xNu, xEind));
+                motorY(yNu_TOV_yEind(yNu, yEind));
+            }
+        }else{
+            if ((infoEindPosOpgehaald == 1) && (startSlot == 1)) {
+                motorX(xNu_TOV_xEind(xNu, xEind));
+                motorY(yNu_TOV_yEind(yNu, yEind));
+            }
         }
-    }else{
-        if ((infoEindPosOpgehaald == 1) && (startSlot == 1)) {
-            motorX(xNu_TOV_xEind(xNu, xEind));
-            motorY(yNu_TOV_yEind(yNu, yEind));
+
+        if ((xNu == xEind) && (yNu == yEind) && (startSlot == 1)) {
+            motorZ(heenTerug);
+
         }
     }
-
-    if ((xNu == xEind) && (yNu == yEind) && (startSlot == 1)) {
-        motorZ(heenTerug);
-
-    }
-  }
 }

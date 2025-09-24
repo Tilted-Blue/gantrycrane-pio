@@ -1,10 +1,11 @@
-#include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "gridfinding_def.h"
 
-typedef enum InputState {
+int lastKey = -1;
+
+enum InputState {
     IDLE,
     PICKUP_X,
     PICKUP_Y,
@@ -15,27 +16,27 @@ typedef enum InputState {
     DROPOFF_X2,
     DROPOFF_Y2,
 
-} InputState;
+};
 
-InputState inputState = IDLE;
+enum InputState inputState = IDLE;
 
  enum key_pressed {
-    D = 0,
-    HASH = 1,
-    ZERO = 2,
-    STAR = 3,
-    C = 4,
-    NINE = 5,
-    EIGHT = 6,
-    SEVEN = 7,
-    B = 8,
-    SIX = 9,
-    FIVE = 10,
-    FOUR = 11,
-    A = 12,
-    THREE = 13,
-    TWO = 14,
-    ONE = 15,
+    D = 15,
+    HASH = 14,
+    ZERO = 13,
+    STAR = 12,
+    C = 11,
+    NINE = 10,
+    EIGHT = 9,
+    SEVEN = 8,
+    B = 7,
+    SIX = 6,
+    FIVE = 5,
+    FOUR = 4,
+    A = 3,
+    THREE = 2,
+    TWO = 1,
+    ONE = 0,
 
 };
 
@@ -224,34 +225,40 @@ void processKey(int key) {
 
 void pickUp_and_DropOff_pos(void) {
     printf("Waiting for coordinates...\n");
-
+    cli();
     // ✅ block until both coordinate pairs are filled
-    if(!(PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord))) {
+    if((PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord))) {
         while (!infoEindPosOpgehaald) {
             int key = keypad_getkey();
-            if (key != -1) {
+            if (key != -1 && key != lastKey) {
                 processKey(key);
-                _delay_ms(200); // crude debounce
+                lastKey = key;     // latch this key
             }
+            if (key == -1) {
+                lastKey = -1;      // reset latch when released
+            }
+
         }
 
     }
 
 
     // ✅ block until both coordinate pairs are filled
-    if(PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord)) {
+    if(!(PIN_SwitchTweedeCoord & (1 << pinSwitchTweedeCoord))) {
         while (!(infoEindPosOpgehaald && infoEindPosOpgehaald2)) {
             int key = keypad_getkey();
-            if (key != -1) {
+            if (key != -1 && key != lastKey) {
                 processKey(key);
-                _delay_ms(200); // crude debounce
+                lastKey = key;     // latch this key
             }
+            if (key == -1) {
+                lastKey = -1;      // reset latch when released
+            }
+
         }
     }
 
     printf("All coordinates received!\n");
+    sei();
     startSlot = 1;
 }
-
-
-
